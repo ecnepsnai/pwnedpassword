@@ -35,7 +35,11 @@ func IsPwnedAsync(password string, cb func(*Result, error)) {
 
 // IsPwned synchronously check if the provided password has been pwned.
 func IsPwned(password string) (*Result, error) {
-	hash := getHash(password)
+	hash, err := getHash(password)
+	if err != nil {
+		return nil, err
+	}
+
 	resp, err := http.Get("https://api.pwnedpasswords.com/range/" + hash.Range)
 	if err != nil {
 		return nil, err
@@ -49,6 +53,10 @@ func IsPwned(password string) (*Result, error) {
 	lines := strings.Split(string(body), "\r\n")
 	for _, line := range lines {
 		components := strings.Split(line, ":")
+		if len(components) != 2 {
+			return nil, fmt.Errorf("invalid response from pwned password API")
+		}
+
 		resultHash := components[0]
 		countStr := components[1]
 
@@ -73,13 +81,19 @@ func IsPwned(password string) (*Result, error) {
 	return &ret, nil
 }
 
-func getHash(password string) pwnedHash {
+func getHash(password string) (*pwnedHash, error) {
 	h := sha1.New()
 	io.WriteString(h, password)
 	hash := fmt.Sprintf("%x", h.Sum(nil))
 	hash = strings.ToUpper(hash)
-	return pwnedHash{
+	if len(hash) < 5 {
+		return nil, fmt.Errorf("unable to hash password")
+	}
+
+	result := pwnedHash{
 		Hash:  hash,
 		Range: hash[0:5],
 	}
+
+	return &result, nil
 }
