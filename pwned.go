@@ -15,7 +15,7 @@ import (
 
 // Result describes a result from the Pwned Password service.
 type Result struct {
-	// Pwned has the password been seen at least once. A value of value doesn't mean the password is any good though.
+	// Pwned has the password been seen at least once. A value of false doesn't mean the password is any good though.
 	Pwned bool
 	// TimesObserved the number of times this password has been seen by the pwned password service.
 	TimesObserved uint64
@@ -26,14 +26,14 @@ type pwnedHash struct {
 	Range string
 }
 
-// IsPwnedAsync asynchronously check if the provided password has been pwned. Calls `cb` with the result when finished.
+// IsPwnedAsync will asynchronously check if the provided password has been pwned. Calls `cb` with the result when finished.
 func IsPwnedAsync(password string, cb func(*Result, error)) {
 	go func() {
 		cb(IsPwned(password))
 	}()
 }
 
-// IsPwned synchronously check if the provided password has been pwned.
+// IsPwned will synchronously check if the provided password has been pwned.
 func IsPwned(password string) (*Result, error) {
 	hash, err := getHash(password)
 	if err != nil {
