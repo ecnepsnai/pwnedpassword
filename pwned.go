@@ -87,7 +87,10 @@ func IsPwned(password string) (*Result, error) {
 
 func getHash(password string) (*pwnedHash, error) {
 	h := sha1.New()
-	io.WriteString(h, password)
+	_, err := io.WriteString(h, password)
+	if err != nil {
+		return nil, err
+	}
 	hash := fmt.Sprintf("%x", h.Sum(nil))
 	hash = strings.ToUpper(hash)
 	if len(hash) < 5 {
