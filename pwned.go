@@ -35,6 +35,10 @@ func IsPwnedAsync(password string, cb func(*Result, error)) {
 
 // IsPwned will synchronously check if the provided password has been pwned.
 func IsPwned(password string) (*Result, error) {
+	if password == "" {
+		return nil, fmt.Errorf("empty password provided")
+	}
+
 	hash, err := getHash(password)
 	if err != nil {
 		return nil, err
