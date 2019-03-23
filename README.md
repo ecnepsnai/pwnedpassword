@@ -1,15 +1,14 @@
 # Golang Pwned Passwords
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/ecnepsnai/go-pwnedpassword?style=flat-square)](https://goreportcard.com/report/github.com/ecnepsnai/go-pwnedpassword)
+[![Godoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://godoc.org/github.com/ecnepsnai/go-pwnedpassword)
+[![Releases](https://img.shields.io/github/release/ecnepsnai/go-pwnedpassword/all.svg?style=flat-square)](https://github.com/ecnepsnai/go-pwnedpassword/releases)
+[![LICENSE](https://img.shields.io/github/license/ecnepsnai/go-pwnedpassword.svg?style=flat-square)](https://github.com/ecnepsnai/go-pwnedpassword/blob/master/LICENSE)
+
 A package to determine if a given password has been "pwned", meaning the password has been
 compromised and may be used in a credential stuffing type attack. This package makes use of
 the "pwned passwords" feature of "Have I Been Pwned"
 https://haveibeenpwned.com/, which was created by Troy Hunt.
-
-# Documentation
-
-Documentation available on GoDoc
-
-<a href="https://godoc.org/github.com/ecnepsnai/go-pwnedpassword"><img src="https://godoc.org/github.com/ecnepsnai/go-pwnedpassword?status.svg" alt="GoDoc"></a>
 
 # Installation
 
