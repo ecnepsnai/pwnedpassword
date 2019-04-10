@@ -6,7 +6,6 @@ package pwned
 import (
 	"crypto/sha1"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -27,15 +26,15 @@ type pwnedHash struct {
 }
 
 // IsPwnedAsync will asynchronously check if the provided password has been pwned. Calls `cb` with the result when finished.
-func IsPwnedAsync(password string, cb func(*Result, error)) {
+func IsPwnedAsync(password []byte, cb func(*Result, error)) {
 	go func() {
 		cb(IsPwned(password))
 	}()
 }
 
 // IsPwned will synchronously check if the provided password has been pwned.
-func IsPwned(password string) (*Result, error) {
-	if password == "" {
+func IsPwned(password []byte) (*Result, error) {
+	if len(password) == 0 {
 		return nil, fmt.Errorf("empty password provided")
 	}
 
@@ -49,7 +48,9 @@ func IsPwned(password string) (*Result, error) {
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -85,9 +86,9 @@ func IsPwned(password string) (*Result, error) {
 	return &ret, nil
 }
 
-func getHash(password string) (*pwnedHash, error) {
+func getHash(password []byte) (*pwnedHash, error) {
 	h := sha1.New()
-	_, err := io.WriteString(h, password)
+	_, err := h.Write(password)
 	if err != nil {
 		return nil, err
 	}
