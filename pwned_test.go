@@ -1,6 +1,7 @@
 package pwned
 
 import (
+	"bytes"
 	"crypto/rand"
 	"encoding/base64"
 	"sync"
@@ -28,12 +29,15 @@ func TestPositiveMatch(t *testing.T) {
 func TestNegativeMatch(t *testing.T) {
 	t.Parallel()
 
-	// Generate Random Password
+	// Generate random password and Base64 encode it for HTTP transfer
 	randBytes := make([]byte, 32)
 	_, _ = rand.Read(randBytes)
-	password := []byte(base64.StdEncoding.EncodeToString(randBytes))
+	var byteBuffer bytes.Buffer
+	encoder := base64.NewEncoder(base64.StdEncoding, &byteBuffer)
+	_, _ = encoder.Write(randBytes)
+	encodedRandomBytes := byteBuffer.Bytes()
 
-	rt, err := IsPwned(password)
+	rt, err := IsPwned(encodedRandomBytes)
 	if err != nil {
 		t.Errorf("IsPwned() error = %s", err.Error())
 		return
