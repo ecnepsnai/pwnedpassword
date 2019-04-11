@@ -33,11 +33,12 @@ type IsPwndCallback func(*Result, error)
 
 // IsStringPwnedAsync will asynchronously check if the provided password has been pwned. Calls `isPwndCallback` with the result when finished.
 func IsStringPwndAsync(password string, isPwndCallback IsPwndCallback) {
-	IsPwnedAsync([]byte(password), isPwndCallback)
+	bytes := []byte(password)
+	IsPwnedAsync(&bytes, isPwndCallback)
 }
 
 // IsPwnedAsync will asynchronously check if the provided password has been pwned. Calls `isPwndCallback` with the result when finished.
-func IsPwnedAsync(password []byte, isPwndCallback IsPwndCallback) {
+func IsPwnedAsync(password *[]byte, isPwndCallback IsPwndCallback) {
 	go func() {
 		isPwndCallback(IsPwned(password))
 	}()
@@ -45,12 +46,13 @@ func IsPwnedAsync(password []byte, isPwndCallback IsPwndCallback) {
 
 // IsStringPwnd will synchronously check if the provided password has been pwned.
 func IsStringPwnd(password string) (*Result, error) {
-	return IsPwned([]byte(password))
+	bytes := []byte(password)
+	return IsPwned(&bytes)
 }
 
 // IsPwned will synchronously check if the provided password has been pwned.
-func IsPwned(password []byte) (*Result, error) {
-	if len(password) == 0 {
+func IsPwned(password *[]byte) (*Result, error) {
+	if len(*password) == 0 {
 		return nil, fmt.Errorf("empty password provided")
 	}
 
@@ -103,9 +105,9 @@ func IsPwned(password []byte) (*Result, error) {
 	return &ret, nil
 }
 
-func getHash(password []byte) (*pwnedHash, error) {
+func getHash(password *[]byte) (*pwnedHash, error) {
 	h := sha1.New()
-	_, err := h.Write(password)
+	_, err := h.Write(*password)
 	if err != nil {
 		return nil, err
 	}

@@ -11,7 +11,8 @@ import (
 func TestPositiveMatch(t *testing.T) {
 	t.Parallel()
 
-	rt, err := IsPwned([]byte("password"))
+	passwordBytes := []byte("password")
+	rt, err := IsPwned(&passwordBytes)
 	if err != nil {
 		t.Errorf("IsPwned() error = %s", err.Error())
 		return
@@ -37,7 +38,7 @@ func TestNegativeMatch(t *testing.T) {
 	_, _ = encoder.Write(randBytes)
 	encodedRandomBytes := byteBuffer.Bytes()
 
-	rt, err := IsPwned(encodedRandomBytes)
+	rt, err := IsPwned(&encodedRandomBytes)
 	if err != nil {
 		t.Errorf("IsPwned() error = %s", err.Error())
 		return
@@ -61,7 +62,8 @@ func TestAsync(t *testing.T) {
 	var result *Result
 	var err error
 
-	IsPwnedAsync([]byte("password"), func(r *Result, e error) {
+	passwordBytes := []byte("password")
+	IsPwnedAsync(&passwordBytes, func(r *Result, e error) {
 		result = r
 		err = e
 		wg.Done()
@@ -86,7 +88,7 @@ func TestAsync(t *testing.T) {
 func TestEmptyPassword(t *testing.T) {
 	t.Parallel()
 
-	_, err := IsPwned([]byte{})
+	_, err := IsPwned(&[]byte{})
 	if err == nil {
 		t.Errorf("No error seen when one expected")
 		return
