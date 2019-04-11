@@ -29,15 +29,17 @@ type pwnedHash struct {
 	Range string
 }
 
-// IsStringPwnedAsync will asynchronously check if the provided password has been pwned. Calls `cb` with the result when finished.
-func IsStringPwndAsync(password string, cb func(*Result, error)) {
-	IsPwnedAsync([]byte(password), cb)
+type IsPwndCallback func(*Result, error)
+
+// IsStringPwnedAsync will asynchronously check if the provided password has been pwned. Calls `isPwndCallback` with the result when finished.
+func IsStringPwndAsync(password string, isPwndCallback IsPwndCallback) {
+	IsPwnedAsync([]byte(password), isPwndCallback)
 }
 
-// IsPwnedAsync will asynchronously check if the provided password has been pwned. Calls `cb` with the result when finished.
-func IsPwnedAsync(password []byte, cb func(*Result, error)) {
+// IsPwnedAsync will asynchronously check if the provided password has been pwned. Calls `isPwndCallback` with the result when finished.
+func IsPwnedAsync(password []byte, isPwndCallback IsPwndCallback) {
 	go func() {
-		cb(IsPwned(password))
+		isPwndCallback(IsPwned(password))
 	}()
 }
 
