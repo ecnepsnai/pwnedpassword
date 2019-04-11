@@ -39,9 +39,7 @@ func IsStringPwndAsync(password string, isPwndCallback IsPwndCallback) {
 
 // IsPwnedAsync will asynchronously check if the provided password has been pwned. Calls `isPwndCallback` with the result when finished.
 func IsPwnedAsync(password *[]byte, isPwndCallback IsPwndCallback) {
-	go func() {
-		isPwndCallback(IsPwned(password))
-	}()
+	go isPwndCallback(IsPwned(password))
 }
 
 // IsStringPwnd will synchronously check if the provided password has been pwned.
