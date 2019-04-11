@@ -12,6 +12,10 @@ import (
 	"strings"
 )
 
+var (
+	PwndApiHost = "https://api.pwnedpasswords.com"
+)
+
 // Result describes a result from the Pwned Password service.
 type Result struct {
 	// Pwned has the password been seen at least once. A value of false doesn't mean the password is any good though.
@@ -25,11 +29,21 @@ type pwnedHash struct {
 	Range string
 }
 
+// IsStringPwnedAsync will asynchronously check if the provided password has been pwned. Calls `cb` with the result when finished.
+func IsStringPwndAsync(password string, cb func(*Result, error)) {
+	IsPwnedAsync([]byte(password), cb)
+}
+
 // IsPwnedAsync will asynchronously check if the provided password has been pwned. Calls `cb` with the result when finished.
 func IsPwnedAsync(password []byte, cb func(*Result, error)) {
 	go func() {
 		cb(IsPwned(password))
 	}()
+}
+
+// IsStringPwnd will synchronously check if the provided password has been pwned.
+func IsStringPwnd(password string) (*Result, error) {
+	return IsPwned([]byte(password))
 }
 
 // IsPwned will synchronously check if the provided password has been pwned.
@@ -43,7 +57,8 @@ func IsPwned(password []byte) (*Result, error) {
 		return nil, err
 	}
 
-	resp, err := http.Get("https://api.pwnedpasswords.com/range/" + hash.Range)
+	requestUrl := fmt.Sprintf("%s/range/%s", PwndApiHost, hash.Range)
+	resp, err := http.Get(requestUrl)
 	if err != nil {
 		return nil, err
 	}
