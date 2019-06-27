@@ -3,9 +3,10 @@ package main
 // Example taken from https://github.com/paul-nelson-baker/pauls-toolbox/blob/master/cmd/check-pwnd/check-pwnd.go
 import (
 	"fmt"
+	"syscall"
+
 	pwn "github.com/ecnepsnai/go-pwnedpassword"
 	"golang.org/x/crypto/ssh/terminal"
-	"syscall"
 )
 
 func main() {
