@@ -6,11 +6,14 @@ package pwned
 import (
 	"crypto/sha1"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
+)
+
+var (
+	PwndApiHost = "https://api.pwnedpasswords.com"
 )
 
 // Result describes a result from the Pwned Password service.
@@ -26,16 +29,28 @@ type pwnedHash struct {
 	Range string
 }
 
-// IsPwnedAsync will asynchronously check if the provided password has been pwned. Calls `cb` with the result when finished.
-func IsPwnedAsync(password string, cb func(*Result, error)) {
-	go func() {
-		cb(IsPwned(password))
-	}()
+type IsPwndCallback func(*Result, error)
+
+// IsStringPwnedAsync will asynchronously check if the provided password has been pwned. Calls `isPwndCallback` with the result when finished.
+func IsStringPwndAsync(password string, isPwndCallback IsPwndCallback) {
+	bytes := []byte(password)
+	IsPwnedAsync(&bytes, isPwndCallback)
+}
+
+// IsPwnedAsync will asynchronously check if the provided password has been pwned. Calls `isPwndCallback` with the result when finished.
+func IsPwnedAsync(password *[]byte, isPwndCallback IsPwndCallback) {
+	go isPwndCallback(IsPwned(password))
+}
+
+// IsStringPwnd will synchronously check if the provided password has been pwned.
+func IsStringPwnd(password string) (*Result, error) {
+	bytes := []byte(password)
+	return IsPwned(&bytes)
 }
 
 // IsPwned will synchronously check if the provided password has been pwned.
-func IsPwned(password string) (*Result, error) {
-	if password == "" {
+func IsPwned(password *[]byte) (*Result, error) {
+	if len(*password) == 0 {
 		return nil, fmt.Errorf("empty password provided")
 	}
 
@@ -44,12 +59,15 @@ func IsPwned(password string) (*Result, error) {
 		return nil, err
 	}
 
-	resp, err := http.Get("https://api.pwnedpasswords.com/range/" + hash.Range)
+	requestUrl := fmt.Sprintf("%s/range/%s", PwndApiHost, hash.Range)
+	resp, err := http.Get(requestUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	defer resp.Body.Close()
+	defer func() {
+		_ = resp.Body.Close()
+	}()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -85,9 +103,9 @@ func IsPwned(password string) (*Result, error) {
 	return &ret, nil
 }
 
-func getHash(password string) (*pwnedHash, error) {
+func getHash(password *[]byte) (*pwnedHash, error) {
 	h := sha1.New()
-	_, err := io.WriteString(h, password)
+	_, err := h.Write(*password)
 	if err != nil {
 		return nil, err
 	}
